@@ -9,7 +9,11 @@ const (
 	DatabaseErrorCode = 103
 	// CategoryNameExistsErrorCode :
 	CategoryNameExistsErrorCode = 111
+	// ProductNameExistsErrorCode :
+	ProductNameExistsErrorCode = 121
 
 	// CategoryNameExistsError :
 	CategoryNameExistsError = "category name exists"
+	// ProductNameExistsError :
+	ProductNameExistsError = "product name exists"
 )
