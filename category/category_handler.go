@@ -45,7 +45,7 @@ func (ch *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 		utils.Fail(w, 400, utils.ValidationErrorCode, err.Error())
 		return
 	}
-	category, err := ch.cs.CreateCategory(&request)
+	category, err := ch.cs.CreateCategory(r.Context(), &request)
 	if err != nil {
 		log.Println("Error : ", err.Error())
 		if err.Error() == utils.CategoryNameExistsError {

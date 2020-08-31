@@ -55,7 +55,7 @@ func (vh *Handler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	request.ProductID = productID
-	variant, err := vh.vs.CreateVariant(&request)
+	variant, err := vh.vs.CreateVariant(r.Context(), &request)
 	if err != nil {
 		log.Println("Error : ", err.Error())
 		if err.Error() == utils.IDProductDoesNotExistError {

@@ -1,11 +1,14 @@
 package category
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+)
 
 // Repo : Category repository
 type Repo interface {
-	CreateCategory(*CreateCategoryRequest) (*Category, error)
-	IsUniqueCategory(string) (bool, error)
+	CreateCategory(context.Context, *CreateCategoryRequest) (*Category, error)
+	IsUniqueCategory(context.Context, string) (bool, error)
 }
 
 // NewRepo : Returns category repo

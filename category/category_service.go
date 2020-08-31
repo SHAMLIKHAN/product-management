@@ -1,6 +1,7 @@
 package category
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"pm/utils"
@@ -8,7 +9,7 @@ import (
 
 // ServiceInterface : Category service
 type ServiceInterface interface {
-	CreateCategory(*CreateCategoryRequest) (*Category, error)
+	CreateCategory(context.Context, *CreateCategoryRequest) (*Category, error)
 }
 
 // Service : Category service struct
@@ -24,15 +25,15 @@ func NewService(db *sql.DB) ServiceInterface {
 }
 
 // CreateCategory : to create a category
-func (cs *Service) CreateCategory(request *CreateCategoryRequest) (*Category, error) {
-	isUnique, err := cs.cr.IsUniqueCategory(request.Name)
+func (cs *Service) CreateCategory(ctx context.Context, request *CreateCategoryRequest) (*Category, error) {
+	isUnique, err := cs.cr.IsUniqueCategory(ctx, request.Name)
 	if err != nil {
 		return nil, err
 	}
 	if isUnique {
 		return nil, errors.New(utils.CategoryNameExistsError)
 	}
-	category, err := cs.cr.CreateCategory(request)
+	category, err := cs.cr.CreateCategory(ctx, request)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package category
 
 import (
+	"context"
 	"database/sql"
 )
 
@@ -20,7 +21,7 @@ func getNullInt32(value int) sql.NullInt32 {
 }
 
 // CreateCategory : Postgres function to create a category
-func (pg *PostgresRepo) CreateCategory(request *CreateCategoryRequest) (*Category, error) {
+func (pg *PostgresRepo) CreateCategory(ctx context.Context, request *CreateCategoryRequest) (*Category, error) {
 	var category Category
 	var parentID sql.NullInt32
 	query := `
@@ -32,14 +33,14 @@ func (pg *PostgresRepo) CreateCategory(request *CreateCategoryRequest) (*Categor
 			)
 			RETURNING id_category, name, id_parent, created_at, updated_at
 	`
-	row := pg.DB.QueryRow(query, request.Name, getNullInt32(request.ParentID))
+	row := pg.DB.QueryRowContext(ctx, query, request.Name, getNullInt32(request.ParentID))
 	err := row.Scan(&category.ID, &category.Name, &parentID, &category.CreatedAt, &category.UpdatedAt)
 	category.IDParent = int(parentID.Int32)
 	return &category, err
 }
 
 // IsUniqueCategory : Postgres function to verify unique category
-func (pg *PostgresRepo) IsUniqueCategory(name string) (bool, error) {
+func (pg *PostgresRepo) IsUniqueCategory(ctx context.Context, name string) (bool, error) {
 	var isUnique bool
 	query := `
 		SELECT
@@ -54,6 +55,6 @@ func (pg *PostgresRepo) IsUniqueCategory(name string) (bool, error) {
 					AND deleted_at IS NULL
 			)
 	`
-	err := pg.DB.QueryRow(query, name).Scan(&isUnique)
+	err := pg.DB.QueryRowContext(ctx, query, name).Scan(&isUnique)
 	return isUnique, err
 }

@@ -1,6 +1,7 @@
 package variant
 
 import (
+	"context"
 	"database/sql"
 )
 
@@ -20,7 +21,7 @@ func getNullFloat64(value float64) sql.NullFloat64 {
 }
 
 // CreateVariant : Postgres function to create a variant
-func (pg *PostgresRepo) CreateVariant(request *CreateVariantRequest) (*Variant, error) {
+func (pg *PostgresRepo) CreateVariant(ctx context.Context, request *CreateVariantRequest) (*Variant, error) {
 	var variant Variant
 	var name, size, colour sql.NullString
 	var discountedPrice sql.NullFloat64
@@ -33,7 +34,7 @@ func (pg *PostgresRepo) CreateVariant(request *CreateVariantRequest) (*Variant, 
 			)
 			RETURNING id_variant, name, max_retail_price, discounted_price, size, colour, id_product, created_at, updated_at
 	`
-	row := pg.DB.QueryRow(query, request.Name, request.MaxRetailPrice, getNullFloat64(request.DiscountedPrice), request.Size, request.Colour, request.ProductID)
+	row := pg.DB.QueryRowContext(ctx, query, request.Name, request.MaxRetailPrice, getNullFloat64(request.DiscountedPrice), request.Size, request.Colour, request.ProductID)
 	err := row.Scan(&variant.ID, &name, &variant.MaxRetailPrice, &discountedPrice, &size, &colour, &variant.ProductID,
 		&variant.CreatedAt, &variant.UpdatedAt)
 	if name.Valid {
@@ -52,7 +53,7 @@ func (pg *PostgresRepo) CreateVariant(request *CreateVariantRequest) (*Variant, 
 }
 
 // IsValidProductID : Postgres function to validate id_product
-func (pg *PostgresRepo) IsValidProductID(productID int) (bool, error) {
+func (pg *PostgresRepo) IsValidProductID(ctx context.Context, productID int) (bool, error) {
 	var isValid bool
 	query := `
 		SELECT
@@ -67,6 +68,6 @@ func (pg *PostgresRepo) IsValidProductID(productID int) (bool, error) {
 					AND deleted_at IS NULL
 			)
 	`
-	err := pg.DB.QueryRow(query, productID).Scan(&isValid)
+	err := pg.DB.QueryRowContext(ctx, query, productID).Scan(&isValid)
 	return isValid, err
 }

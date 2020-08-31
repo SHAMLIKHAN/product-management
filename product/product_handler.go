@@ -45,7 +45,7 @@ func (ph *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		utils.Fail(w, 400, utils.ValidationErrorCode, err.Error())
 		return
 	}
-	product, err := ph.ps.CreateProduct(&request)
+	product, err := ph.ps.CreateProduct(r.Context(), &request)
 	if err != nil {
 		log.Println("Error : ", err.Error())
 		if err.Error() == utils.ProductNameExistsError {

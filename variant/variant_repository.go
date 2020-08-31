@@ -1,11 +1,14 @@
 package variant
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+)
 
 // Repo : Variant repository
 type Repo interface {
-	CreateVariant(*CreateVariantRequest) (*Variant, error)
-	IsValidProductID(int) (bool, error)
+	CreateVariant(context.Context, *CreateVariantRequest) (*Variant, error)
+	IsValidProductID(context.Context, int) (bool, error)
 }
 
 // NewRepo : Returns variant repo
