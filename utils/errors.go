@@ -11,9 +11,13 @@ const (
 	CategoryNameExistsErrorCode = 111
 	// ProductNameExistsErrorCode :
 	ProductNameExistsErrorCode = 121
+	// IDProductDoesNotExistErrorCode :
+	IDProductDoesNotExistErrorCode = 122
 
 	// CategoryNameExistsError :
 	CategoryNameExistsError = "category name exists"
 	// ProductNameExistsError :
 	ProductNameExistsError = "product name exists"
+	// IDProductDoesNotExistError :
+	IDProductDoesNotExistError = "id_product doesn't exist"
 )

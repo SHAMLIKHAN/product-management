@@ -9,16 +9,6 @@ type PostgresRepo struct {
 	DB *sql.DB
 }
 
-func getNullInt32(value int) sql.NullInt32 {
-	if value == 0 {
-		return sql.NullInt32{}
-	}
-	return sql.NullInt32{
-		Int32: int32(value),
-		Valid: true,
-	}
-}
-
 // CreateProduct : Postgres function to create a product
 func (pg *PostgresRepo) CreateProduct(request *CreateProductRequest) (*Product, error) {
 	var product Product

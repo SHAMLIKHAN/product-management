@@ -5,6 +5,7 @@ import (
 	"pm/category"
 	"pm/product"
 	"pm/status"
+	"pm/variant"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -39,11 +40,13 @@ func (r *ChiRouter) Setup() *chi.Mux {
 	sh := status.NewHTTPHandler(r.DB)
 	ch := category.NewHTTPHandler(r.DB)
 	ph := product.NewHTTPHandler(r.DB)
+	vh := variant.NewHTTPHandler(r.DB)
 
 	cr.Route("/v1", func(cr chi.Router) {
 		cr.Get("/app/status", sh.GetAppStatus)
 		cr.Post("/app/category", ch.CreateCategory)
 		cr.Post("/app/product", ph.CreateProduct)
+		cr.Post("/app/product/{id_product}/variant", vh.CreateVariant)
 	})
 	return cr
 }
