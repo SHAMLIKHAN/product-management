@@ -71,3 +71,48 @@ func (pg *PostgresRepo) IsValidProductID(ctx context.Context, productID int) (bo
 	err := pg.DB.QueryRowContext(ctx, query, productID).Scan(&isValid)
 	return isValid, err
 }
+
+// ListVariant : Postgres function to list variants of a product
+func (pg *PostgresRepo) ListVariant(ctx context.Context, request *ListVariantRequest) ([]Variant, error) {
+	var variants []Variant
+	var name, size, colour sql.NullString
+	var discountedPrice sql.NullFloat64
+	query := `
+		SELECT
+			id_variant, name, max_retail_price, discounted_price, size, colour, created_at, updated_at
+		FROM
+			variant
+		WHERE
+			id_product = $1
+			AND deleted_at IS NULL
+		LIMIT $2
+		OFFSET $3
+	`
+	rows, err := pg.DB.QueryContext(ctx, query, request.ProductID, request.Limit, request.Offset)
+	if err != nil {
+		return nil, err
+	}
+	var variant Variant
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&variant.ID, &name, &variant.MaxRetailPrice, &discountedPrice, &size, &colour, &variant.CreatedAt, &variant.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		if name.Valid {
+			variant.Name = name.String
+		}
+		if size.Valid {
+			variant.Size = size.String
+		}
+		if colour.Valid {
+			variant.Colour = colour.String
+		}
+		if discountedPrice.Valid {
+			variant.DiscountedPrice = discountedPrice.Float64
+		}
+		variant.ProductID = request.ProductID
+		variants = append(variants, variant)
+	}
+	return variants, nil
+}

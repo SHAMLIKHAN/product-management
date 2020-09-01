@@ -9,3 +9,10 @@ type CreateVariantRequest struct {
 	Colour          string  `json:"colour"`
 	ProductID       int     `json:"id_product"`
 }
+
+// ListVariantRequest :
+type ListVariantRequest struct {
+	ProductID int
+	Limit     int
+	Offset    int
+}
