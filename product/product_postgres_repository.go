@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"pm/utils"
+	"strings"
+	"time"
 )
 
 // PostgresRepo : Product repo struct for postgres
@@ -249,4 +252,40 @@ func (pg *PostgresRepo) RemoveProduct(ctx context.Context, request *RemoveProduc
 		tx.Rollback()
 	}
 	return nil
+}
+
+// UpdateProduct : Postgres function to update a product
+func (pg *PostgresRepo) UpdateProduct(ctx context.Context, request *UpdateProductRequest, columns map[string]interface{}) error {
+	var slice []string
+	paramsPosition := 0
+	columns["updated_at"] = time.Now()
+	var params []interface{}
+	for column, value := range columns {
+		paramsPosition++
+		slice = append(slice, fmt.Sprintf(" %s = $%d ", column, paramsPosition))
+		params = append(params, value)
+	}
+	update := strings.Join(slice, ", ")
+	updateQuery := fmt.Sprintf("%s", update)
+	paramsPosition++
+	mainQuery := `
+		UPDATE
+			product
+		SET
+			%s
+		WHERE
+			id_product = $%d
+			AND deleted_at IS NULL
+	`
+	query := fmt.Sprintf(mainQuery, updateQuery, paramsPosition)
+	params = append(params, request.ProductID)
+	result, err := pg.DB.ExecContext(ctx, query, params...)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if rowsAffected == 0 {
+		return errors.New(utils.InvalidVariantIDError)
+	}
+	return err
 }

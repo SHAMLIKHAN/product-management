@@ -12,6 +12,7 @@ type Repo interface {
 	IsUniqueProduct(context.Context, string) (bool, error)
 	ListProduct(context.Context, *ListProductRequest) ([]VariantProductRow, error)
 	RemoveProduct(context.Context, *RemoveProductRequest) error
+	UpdateProduct(context.Context, *UpdateProductRequest, map[string]interface{}) error
 }
 
 // NewRepo : Returns product repo

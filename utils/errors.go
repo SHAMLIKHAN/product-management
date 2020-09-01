@@ -21,6 +21,8 @@ const (
 	IDProductDoesNotExistErrorCode = 122
 	// InvalidProductIDErrorCode :
 	InvalidProductIDErrorCode = 123
+	// NothingToUpdateProductErrorCode :
+	NothingToUpdateProductErrorCode = 124
 	// InvalidVariantIDErrorCode :
 	InvalidVariantIDErrorCode = 131
 	// NothingToUpdateVariantErrorCode :
@@ -44,4 +46,6 @@ const (
 	InvalidCategoryIDError = "invalid id_category"
 	// NothingToUpdateVariantError :
 	NothingToUpdateVariantError = "nothing to update variant"
+	// NothingToUpdateProductError :
+	NothingToUpdateProductError = "nothing to update product"
 )

@@ -23,3 +23,11 @@ type ListProductRequest struct {
 type RemoveProductRequest struct {
 	ProductID int
 }
+
+// UpdateProductRequest :
+type UpdateProductRequest struct {
+	ProductID   int
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	ImageURL    string `json:"image_url"`
+}

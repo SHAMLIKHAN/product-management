@@ -13,6 +13,7 @@ type ServiceInterface interface {
 	GetProduct(context.Context, *GetProductRequest) (*VariantProduct, error)
 	ListProduct(context.Context, *ListProductRequest) ([]VariantProduct, error)
 	RemoveProduct(context.Context, *RemoveProductRequest) error
+	UpdateProduct(context.Context, *UpdateProductRequest) error
 }
 
 // Service : Product service struct
@@ -130,4 +131,22 @@ func (ps *Service) ListProduct(ctx context.Context, request *ListProductRequest)
 // RemoveProduct : to remove a product and its variants
 func (ps *Service) RemoveProduct(ctx context.Context, request *RemoveProductRequest) error {
 	return ps.pr.RemoveProduct(ctx, request)
+}
+
+// UpdateProduct : to update a product
+func (ps *Service) UpdateProduct(ctx context.Context, request *UpdateProductRequest) error {
+	columns := make(map[string]interface{})
+	if request.Name != "" {
+		columns["name"] = request.Name
+	}
+	if request.Description != "" {
+		columns["description"] = request.Description
+	}
+	if request.ImageURL != "" {
+		columns["image_url"] = request.ImageURL
+	}
+	if len(columns) == 0 {
+		return errors.New(utils.NothingToUpdateProductError)
+	}
+	return ps.pr.UpdateProduct(ctx, request, columns)
 }

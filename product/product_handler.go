@@ -19,6 +19,7 @@ type HandlerInterface interface {
 	GetProduct(w http.ResponseWriter, r *http.Request)
 	ListProduct(w http.ResponseWriter, r *http.Request)
 	RemoveProduct(w http.ResponseWriter, r *http.Request)
+	UpdateProduct(w http.ResponseWriter, r *http.Request)
 }
 
 // Handler : Product handler struct
@@ -133,5 +134,37 @@ func (ph *Handler) RemoveProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("App : product removed! id_product : ", productID)
+	utils.Send(w, 200, nil)
+}
+
+// UpdateProduct : to update a product
+func (ph *Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	log.Println("App : PATCH /app/product/{id_product} API hit!")
+	var request UpdateProductRequest
+	body := json.NewDecoder(r.Body)
+	err := body.Decode(&request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, err.Error())
+		return
+	}
+	productID, err := strconv.Atoi(chi.URLParam(r, "id_product"))
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, errors.New("invalid id_product").Error())
+		return
+	}
+	request.ProductID = productID
+	err = ph.ps.UpdateProduct(r.Context(), &request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		if err.Error() == utils.NothingToUpdateProductError {
+			utils.Fail(w, 400, utils.NothingToUpdateProductErrorCode, err.Error())
+			return
+		}
+		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
+		return
+	}
+	log.Println("App : product updated! id_product : ", productID)
 	utils.Send(w, 200, nil)
 }
