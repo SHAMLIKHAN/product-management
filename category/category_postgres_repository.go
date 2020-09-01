@@ -71,8 +71,6 @@ func (pg *PostgresRepo) ListCategory(ctx context.Context, request *ListCategoryR
 				category
 			WHERE
 				deleted_at IS NULL
-			LIMIT $1
-			OFFSET $2
 		)
 		SELECT
 			c1.id_category AS id_parent,
@@ -104,7 +102,7 @@ func (pg *PostgresRepo) ListCategory(ctx context.Context, request *ListCategoryR
 			p.deleted_at IS NULL
 			AND v.deleted_at IS NULL
 	`
-	rows, err := pg.DB.QueryContext(ctx, query, request.Limit, request.Offset)
+	rows, err := pg.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
