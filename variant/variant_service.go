@@ -12,6 +12,7 @@ type ServiceInterface interface {
 	CreateVariant(context.Context, *CreateVariantRequest) (*Variant, error)
 	GetVariant(context.Context, *GetVariantRequest) (*Variant, error)
 	ListVariant(context.Context, *ListVariantRequest) ([]Variant, error)
+	RemoveVariant(context.Context, *RemoveVariantRequest) error
 }
 
 // Service : Variant service struct
@@ -60,4 +61,16 @@ func (vs *Service) ListVariant(ctx context.Context, request *ListVariantRequest)
 		return nil, errors.New(utils.IDProductDoesNotExistError)
 	}
 	return vs.vr.ListVariant(ctx, request)
+}
+
+// RemoveVariant : to remove variant of a product
+func (vs *Service) RemoveVariant(ctx context.Context, request *RemoveVariantRequest) error {
+	isValid, err := vs.vr.IsValidProductID(ctx, request.ProductID)
+	if err != nil {
+		return err
+	}
+	if !isValid {
+		return errors.New(utils.IDProductDoesNotExistError)
+	}
+	return vs.vr.RemoveVariant(ctx, request)
 }

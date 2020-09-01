@@ -11,6 +11,7 @@ type Repo interface {
 	GetVariant(context.Context, *GetVariantRequest) (*Variant, error)
 	IsValidProductID(context.Context, int) (bool, error)
 	ListVariant(context.Context, *ListVariantRequest) ([]Variant, error)
+	RemoveVariant(context.Context, *RemoveVariantRequest) error
 }
 
 // NewRepo : Returns variant repo

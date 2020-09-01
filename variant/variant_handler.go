@@ -18,6 +18,7 @@ type HandlerInterface interface {
 	CreateVariant(w http.ResponseWriter, r *http.Request)
 	GetVariant(w http.ResponseWriter, r *http.Request)
 	ListVariant(w http.ResponseWriter, r *http.Request)
+	RemoveVariant(w http.ResponseWriter, r *http.Request)
 }
 
 // Handler : Variant handler struct
@@ -136,4 +137,37 @@ func (vh *Handler) ListVariant(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("App : variants listed! id_product : ", productID)
 	utils.Send(w, 200, variants)
+}
+
+// RemoveVariant : to remove a variant of a product
+func (vh *Handler) RemoveVariant(w http.ResponseWriter, r *http.Request) {
+	log.Println("App : Delete /app/product/{id_product}/variant/{id_variant} API hit!")
+	productID, err := strconv.Atoi(chi.URLParam(r, "id_product"))
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, errors.New("invalid id_product").Error())
+		return
+	}
+	variantID, err := strconv.Atoi(chi.URLParam(r, "id_variant"))
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, errors.New("invalid id_variant").Error())
+		return
+	}
+	request := RemoveVariantRequest{
+		ProductID: productID,
+		VariantID: variantID,
+	}
+	err = vh.vs.RemoveVariant(r.Context(), &request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		if err.Error() == utils.InvalidVariantIDError {
+			utils.Fail(w, 400, utils.InvalidVariantIDErrorCode, err.Error())
+			return
+		}
+		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
+		return
+	}
+	log.Println("App : variant removed! id_variant : ", variantID)
+	utils.Send(w, 200, nil)
 }

@@ -22,3 +22,9 @@ type ListVariantRequest struct {
 	Limit     int
 	Offset    int
 }
+
+// RemoveVariantRequest :
+type RemoveVariantRequest struct {
+	ProductID int
+	VariantID int
+}

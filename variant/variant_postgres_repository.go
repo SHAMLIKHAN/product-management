@@ -3,6 +3,8 @@ package variant
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"pm/utils"
 )
 
 // PostgresRepo : Variant repo struct for postgres
@@ -152,4 +154,30 @@ func (pg *PostgresRepo) ListVariant(ctx context.Context, request *ListVariantReq
 		variants = append(variants, variant)
 	}
 	return variants, nil
+}
+
+// RemoveVariant : Postgres function to remove a variant of a product
+func (pg *PostgresRepo) RemoveVariant(ctx context.Context, request *RemoveVariantRequest) error {
+	query := `
+		UPDATE
+			variant
+		SET
+			deleted_at = NOW()
+		WHERE
+			id_product = $1
+			AND id_variant = $2
+			AND deleted_at IS NULL
+	`
+	result, err := pg.DB.ExecContext(ctx, query, request.ProductID, request.VariantID)
+	if err != nil {
+		return err
+	}
+	updateCount, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if updateCount == 0 {
+		return errors.New(utils.InvalidVariantIDError)
+	}
+	return nil
 }
