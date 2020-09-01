@@ -161,6 +161,9 @@ func (ph *Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		if err.Error() == utils.NothingToUpdateProductError {
 			utils.Fail(w, 400, utils.NothingToUpdateProductErrorCode, err.Error())
 			return
+		} else if err.Error() == utils.InvalidProductIDError {
+			utils.Fail(w, 400, utils.InvalidProductIDErrorCode, err.Error())
+			return
 		}
 		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
 		return

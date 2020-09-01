@@ -285,7 +285,7 @@ func (pg *PostgresRepo) UpdateProduct(ctx context.Context, request *UpdateProduc
 	}
 	rowsAffected, err := result.RowsAffected()
 	if rowsAffected == 0 {
-		return errors.New(utils.InvalidVariantIDError)
+		return errors.New(utils.InvalidProductIDError)
 	}
 	return err
 }

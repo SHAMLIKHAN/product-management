@@ -16,3 +16,10 @@ type ListCategoryRequest struct {
 type RemoveCategoryRequest struct {
 	CategoryID int
 }
+
+// UpdateCategoryRequest :
+type UpdateCategoryRequest struct {
+	CategoryID int
+	Name       string `json:"name"`
+	ParentID   int    `json:"id_parent" validate:"omitempty,gt=0"`
+}

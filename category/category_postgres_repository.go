@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"pm/utils"
+	"strings"
+	"time"
 )
 
 // PostgresRepo : Category repo struct for postgres
@@ -39,6 +42,26 @@ func (pg *PostgresRepo) CreateCategory(ctx context.Context, request *CreateCateg
 	err := row.Scan(&category.ID, &category.Name, &parentID, &category.CreatedAt, &category.UpdatedAt)
 	category.IDParent = int(parentID.Int32)
 	return &category, err
+}
+
+// IsExistCategory : Postgres function to verify category parent
+func (pg *PostgresRepo) IsExistCategory(ctx context.Context, request *UpdateCategoryRequest) (bool, error) {
+	var isExist bool
+	query := `
+		SELECT
+			EXISTS
+			(
+				SELECT
+					1
+				FROM
+					category
+				WHERE
+					id_category = $1
+					AND deleted_at IS NULL
+			)
+	`
+	err := pg.DB.QueryRowContext(ctx, query, request.ParentID).Scan(&isExist)
+	return isExist, err
 }
 
 // IsExistProduct : Postgres function to check is there any undeleted product under the category
@@ -224,4 +247,40 @@ func (pg *PostgresRepo) RemoveCategory(ctx context.Context, request *RemoveCateg
 		return errors.New(utils.InvalidCategoryIDError)
 	}
 	return nil
+}
+
+// UpdateCategory : Postgres function to update a category
+func (pg *PostgresRepo) UpdateCategory(ctx context.Context, request *UpdateCategoryRequest, columns map[string]interface{}) error {
+	var slice []string
+	paramsPosition := 0
+	columns["updated_at"] = time.Now()
+	var params []interface{}
+	for column, value := range columns {
+		paramsPosition++
+		slice = append(slice, fmt.Sprintf(" %s = $%d ", column, paramsPosition))
+		params = append(params, value)
+	}
+	update := strings.Join(slice, ", ")
+	updateQuery := fmt.Sprintf("%s", update)
+	paramsPosition++
+	mainQuery := `
+		UPDATE
+			category
+		SET
+			%s
+		WHERE
+			id_category = $%d
+			AND deleted_at IS NULL
+	`
+	query := fmt.Sprintf(mainQuery, updateQuery, paramsPosition)
+	params = append(params, request.CategoryID)
+	result, err := pg.DB.ExecContext(ctx, query, params...)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if rowsAffected == 0 {
+		return errors.New(utils.InvalidCategoryIDError)
+	}
+	return err
 }

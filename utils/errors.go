@@ -15,6 +15,8 @@ const (
 	SomeSubCategoriesAreBelongsToCategoryErrorCode = 113
 	// InvalidCategoryIDErrorCode :
 	InvalidCategoryIDErrorCode = 114
+	// NothingToUpdateCategoryErrorCode :
+	NothingToUpdateCategoryErrorCode = 115
 	// ProductNameExistsErrorCode :
 	ProductNameExistsErrorCode = 121
 	// IDProductDoesNotExistErrorCode :
@@ -48,4 +50,6 @@ const (
 	NothingToUpdateVariantError = "nothing to update variant"
 	// NothingToUpdateProductError :
 	NothingToUpdateProductError = "nothing to update product"
+	// NothingToUpdateCategoryError :
+	NothingToUpdateCategoryError = "nothing to update category"
 )

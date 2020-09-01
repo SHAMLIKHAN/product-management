@@ -12,6 +12,7 @@ type ServiceInterface interface {
 	CreateCategory(context.Context, *CreateCategoryRequest) (*Category, error)
 	ListCategory(context.Context, *ListCategoryRequest) ([]ProductCategory, error)
 	RemoveCategory(context.Context, *RemoveCategoryRequest) error
+	UpdateCategory(context.Context, *UpdateCategoryRequest) error
 }
 
 // Service : Category service struct
@@ -184,4 +185,26 @@ func (cs *Service) RemoveCategory(ctx context.Context, request *RemoveCategoryRe
 		return errors.New(utils.SomeProductsAreBelongsToCategoryError)
 	}
 	return cs.cr.RemoveCategory(ctx, request)
+}
+
+// UpdateCategory : to update a category
+func (cs *Service) UpdateCategory(ctx context.Context, request *UpdateCategoryRequest) error {
+	columns := make(map[string]interface{})
+	if request.Name != "" {
+		columns["name"] = request.Name
+	}
+	if request.ParentID != 0 {
+		isExist, err := cs.cr.IsExistCategory(ctx, request)
+		if err != nil {
+			return err
+		}
+		if !isExist {
+			return errors.New(utils.InvalidCategoryIDError)
+		}
+		columns["id_parent"] = request.ParentID
+	}
+	if len(columns) == 0 {
+		return errors.New(utils.NothingToUpdateCategoryError)
+	}
+	return cs.cr.UpdateCategory(ctx, request, columns)
 }

@@ -18,6 +18,7 @@ type HandlerInterface interface {
 	CreateCategory(w http.ResponseWriter, r *http.Request)
 	ListCategory(w http.ResponseWriter, r *http.Request)
 	RemoveCategory(w http.ResponseWriter, r *http.Request)
+	UpdateCategory(w http.ResponseWriter, r *http.Request)
 }
 
 // Handler : Category handler struct
@@ -116,5 +117,40 @@ func (ch *Handler) RemoveCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("App : category removed! id_category : ", categoryID)
+	utils.Send(w, 200, nil)
+}
+
+// UpdateCategory : to update a category
+func (ch *Handler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
+	log.Println("App : PATCH /app/category/{id_category} API hit!")
+	var request UpdateCategoryRequest
+	body := json.NewDecoder(r.Body)
+	err := body.Decode(&request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, err.Error())
+		return
+	}
+	categoryID, err := strconv.Atoi(chi.URLParam(r, "id_category"))
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, errors.New("invalid id_category").Error())
+		return
+	}
+	request.CategoryID = categoryID
+	err = ch.cs.UpdateCategory(r.Context(), &request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		if err.Error() == utils.NothingToUpdateCategoryError {
+			utils.Fail(w, 400, utils.NothingToUpdateCategoryErrorCode, err.Error())
+			return
+		} else if err.Error() == utils.InvalidCategoryIDError {
+			utils.Fail(w, 400, utils.InvalidCategoryIDErrorCode, err.Error())
+			return
+		}
+		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
+		return
+	}
+	log.Println("App : category updated! id_category : ", categoryID)
 	utils.Send(w, 200, nil)
 }
