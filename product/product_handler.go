@@ -13,6 +13,7 @@ import (
 // HandlerInterface : Product handler
 type HandlerInterface interface {
 	CreateProduct(w http.ResponseWriter, r *http.Request)
+	ListProduct(w http.ResponseWriter, r *http.Request)
 }
 
 // Handler : Product handler struct
@@ -57,4 +58,27 @@ func (ph *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("App : product created! id_product : ", product.ID)
 	utils.Send(w, 200, product)
+}
+
+// ListProduct : to list out all products
+func (ph *Handler) ListProduct(w http.ResponseWriter, r *http.Request) {
+	log.Println("App : GET /app/product API hit!")
+	req := ListProductRequest{
+		Limit:  DefaultListProductLimit,
+		Offset: DefaultOffset,
+	}
+	request, err := validateListProductRequest(&req, r)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.ValidationErrorCode, err.Error())
+		return
+	}
+	products, err := ph.ps.ListProduct(r.Context(), request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
+		return
+	}
+	log.Println("App : products listed!")
+	utils.Send(w, 200, products)
 }

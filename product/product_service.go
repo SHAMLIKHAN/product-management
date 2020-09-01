@@ -10,6 +10,7 @@ import (
 // ServiceInterface : Product service
 type ServiceInterface interface {
 	CreateProduct(context.Context, *CreateProductRequest) (*Product, error)
+	ListProduct(context.Context, *ListProductRequest) ([]VariantProduct, error)
 }
 
 // Service : Product service struct
@@ -38,4 +39,57 @@ func (ps *Service) CreateProduct(ctx context.Context, request *CreateProductRequ
 		return nil, err
 	}
 	return product, nil
+}
+
+// ListProduct : to list out products
+func (ps *Service) ListProduct(ctx context.Context, request *ListProductRequest) ([]VariantProduct, error) {
+	rows, err := ps.pr.ListProduct(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	var productList []VariantProduct
+	if len(rows) > 0 {
+		for _, row := range rows {
+			var (
+				product    VariantProduct
+				variant    Variant
+				variants   []Variant
+				isAppended bool
+			)
+			for index, product := range productList {
+				if product.ID == row.IDProduct {
+					variant.ID = row.IDVariant
+					variant.Name = row.VariantName
+					variant.MaxRetailPrice = row.MaxRetailPrice
+					variant.DiscountedPrice = row.DiscountedPrice
+					variant.Size = row.VariantSize
+					variant.Colour = row.VariantColour
+					product.Variants = append(product.Variants, variant)
+					productList[index] = product
+					isAppended = true
+					break
+				}
+			}
+			if isAppended {
+				continue
+			}
+			if row.IDVariant != 0 {
+				variant.ID = row.IDVariant
+				variant.Name = row.VariantName
+				variant.MaxRetailPrice = row.MaxRetailPrice
+				variant.DiscountedPrice = row.DiscountedPrice
+				variant.Size = row.VariantSize
+				variant.Colour = row.VariantColour
+				variants = append(variants, variant)
+			}
+			product.ID = row.IDProduct
+			product.Name = row.ProductName
+			product.Description = row.Description
+			product.ImageURL = row.ImageURL
+			product.IDCategory = row.IDCategory
+			product.Variants = variants
+			productList = append(productList, product)
+		}
+	}
+	return productList, nil
 }

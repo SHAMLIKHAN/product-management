@@ -9,6 +9,7 @@ import (
 type Repo interface {
 	CreateProduct(context.Context, *CreateProductRequest) (*Product, error)
 	IsUniqueProduct(context.Context, string) (bool, error)
+	ListProduct(context.Context, *ListProductRequest) ([]VariantProductRow, error)
 }
 
 // NewRepo : Returns product repo

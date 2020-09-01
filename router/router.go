@@ -46,6 +46,7 @@ func (r *ChiRouter) Setup() *chi.Mux {
 		cr.Get("/app/status", sh.GetAppStatus)
 		cr.Post("/app/category", ch.CreateCategory)
 		cr.Post("/app/product", ph.CreateProduct)
+		cr.Get("/app/product", ph.ListProduct)
 		cr.Post("/app/product/{id_product}/variant", vh.CreateVariant)
 		cr.Get("/app/product/{id_product}/variant", vh.ListVariant)
 		cr.Get("/app/product/{id_product}/variant/{id_variant}", vh.GetVariant)

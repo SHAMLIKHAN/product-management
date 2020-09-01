@@ -7,3 +7,9 @@ type CreateProductRequest struct {
 	ImageURL    string `json:"image_url"`
 	CategoryID  int    `json:"id_category" validate:"required,gt=0"`
 }
+
+// ListProductRequest :
+type ListProductRequest struct {
+	Limit  int
+	Offset int
+}
