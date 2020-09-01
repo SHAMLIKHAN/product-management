@@ -3,16 +3,20 @@ package product
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"pm/utils"
+	"strconv"
 
+	"github.com/go-chi/chi"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 // HandlerInterface : Product handler
 type HandlerInterface interface {
 	CreateProduct(w http.ResponseWriter, r *http.Request)
+	GetProduct(w http.ResponseWriter, r *http.Request)
 	ListProduct(w http.ResponseWriter, r *http.Request)
 }
 
@@ -57,6 +61,28 @@ func (ph *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("App : product created! id_product : ", product.ID)
+	utils.Send(w, 200, product)
+}
+
+// GetProduct : to get a product
+func (ph *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	log.Println("App : GET /app/product/{id_product} API hit!")
+	productID, err := strconv.Atoi(chi.URLParam(r, "id_product"))
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, errors.New("invalid id_product").Error())
+		return
+	}
+	request := GetProductRequest{
+		ProductID: productID,
+	}
+	product, err := ph.ps.GetProduct(r.Context(), &request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
+		return
+	}
+	log.Println("App : products fetched! id_product : ", productID)
 	utils.Send(w, 200, product)
 }
 

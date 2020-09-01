@@ -10,6 +10,7 @@ import (
 // ServiceInterface : Product service
 type ServiceInterface interface {
 	CreateProduct(context.Context, *CreateProductRequest) (*Product, error)
+	GetProduct(context.Context, *GetProductRequest) (*VariantProduct, error)
 	ListProduct(context.Context, *ListProductRequest) ([]VariantProduct, error)
 }
 
@@ -39,6 +40,37 @@ func (ps *Service) CreateProduct(ctx context.Context, request *CreateProductRequ
 		return nil, err
 	}
 	return product, nil
+}
+
+// GetProduct : to get a product
+func (ps *Service) GetProduct(ctx context.Context, request *GetProductRequest) (*VariantProduct, error) {
+	rows, err := ps.pr.GetProduct(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	var (
+		product  VariantProduct
+		variant  Variant
+		variants []Variant
+	)
+	for _, row := range rows {
+		if row.IDVariant != 0 {
+			variant.ID = row.IDVariant
+			variant.Name = row.VariantName
+			variant.MaxRetailPrice = row.MaxRetailPrice
+			variant.DiscountedPrice = row.DiscountedPrice
+			variant.Size = row.VariantSize
+			variant.Colour = row.VariantColour
+			variants = append(variants, variant)
+		}
+	}
+	product.ID = rows[0].IDProduct
+	product.Name = rows[0].ProductName
+	product.Description = rows[0].Description
+	product.ImageURL = rows[0].ImageURL
+	product.IDCategory = rows[0].IDCategory
+	product.Variants = variants
+	return &product, nil
 }
 
 // ListProduct : to list out products

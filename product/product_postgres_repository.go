@@ -30,6 +30,76 @@ func (pg *PostgresRepo) CreateProduct(ctx context.Context, request *CreateProduc
 	return &product, err
 }
 
+// GetProduct : Postgres function to get a product
+func (pg *PostgresRepo) GetProduct(ctx context.Context, request *GetProductRequest) ([]VariantProductRow, error) {
+	var vpList []VariantProductRow
+	var description, imageURL, variantName, size, colour sql.NullString
+	var maxRetailPrice, discountedPrice sql.NullFloat64
+	var variantID sql.NullInt32
+	query := `
+		SELECT
+			p.id_product,
+			p.name AS product_name,
+			p.description,
+			p.image_url,
+			p.id_category,
+			v.id_variant,
+			v.name AS variant_name,
+			v.max_retail_price,
+			v.discounted_price,
+			v.size,
+			v.colour
+		FROM
+			product p
+			LEFT JOIN
+				variant v
+				ON p.id_product = v.id_product
+		WHERE
+			p.id_product = $1
+			AND p.deleted_at IS NULL
+			AND v.deleted_at IS NULL
+	`
+	rows, err := pg.DB.QueryContext(ctx, query, request.ProductID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var vp VariantProductRow
+	for rows.Next() {
+		err := rows.Scan(&vp.IDProduct, &vp.ProductName, &description, &imageURL, &vp.IDCategory,
+			&variantID, &variantName, &maxRetailPrice, &discountedPrice, &size, &colour)
+		if err != nil {
+			return nil, err
+		}
+		if description.Valid {
+			vp.Description = description.String
+		}
+		if imageURL.Valid {
+			vp.ImageURL = imageURL.String
+		}
+		if variantID.Valid {
+			vp.IDVariant = int(variantID.Int32)
+			if variantName.Valid {
+				vp.VariantName = variantName.String
+			}
+			if size.Valid {
+				vp.VariantSize = size.String
+			}
+			if colour.Valid {
+				vp.VariantColour = colour.String
+			}
+			if maxRetailPrice.Valid {
+				vp.MaxRetailPrice = maxRetailPrice.Float64
+			}
+			if discountedPrice.Valid {
+				vp.DiscountedPrice = discountedPrice.Float64
+			}
+		}
+		vpList = append(vpList, vp)
+	}
+	return vpList, nil
+}
+
 // IsUniqueProduct : Postgres function to verify unique product
 func (pg *PostgresRepo) IsUniqueProduct(ctx context.Context, name string) (bool, error) {
 	var isUnique bool

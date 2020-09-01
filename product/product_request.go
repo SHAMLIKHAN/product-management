@@ -8,6 +8,11 @@ type CreateProductRequest struct {
 	CategoryID  int    `json:"id_category" validate:"required,gt=0"`
 }
 
+// GetProductRequest :
+type GetProductRequest struct {
+	ProductID int
+}
+
 // ListProductRequest :
 type ListProductRequest struct {
 	Limit  int
