@@ -18,6 +18,7 @@ type HandlerInterface interface {
 	CreateProduct(w http.ResponseWriter, r *http.Request)
 	GetProduct(w http.ResponseWriter, r *http.Request)
 	ListProduct(w http.ResponseWriter, r *http.Request)
+	RemoveProduct(w http.ResponseWriter, r *http.Request)
 }
 
 // Handler : Product handler struct
@@ -107,4 +108,30 @@ func (ph *Handler) ListProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("App : products listed!")
 	utils.Send(w, 200, products)
+}
+
+// RemoveProduct : to remove a product and its variants
+func (ph *Handler) RemoveProduct(w http.ResponseWriter, r *http.Request) {
+	log.Println("App : Delete /app/product/{id_product} API hit!")
+	productID, err := strconv.Atoi(chi.URLParam(r, "id_product"))
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, errors.New("invalid id_product").Error())
+		return
+	}
+	request := RemoveProductRequest{
+		ProductID: productID,
+	}
+	err = ph.ps.RemoveProduct(r.Context(), &request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		if err.Error() == utils.InvalidProductIDError {
+			utils.Fail(w, 500, utils.InvalidProductIDErrorCode, err.Error())
+			return
+		}
+		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
+		return
+	}
+	log.Println("App : product removed! id_product : ", productID)
+	utils.Send(w, 200, nil)
 }

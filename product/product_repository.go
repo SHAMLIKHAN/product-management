@@ -11,6 +11,7 @@ type Repo interface {
 	GetProduct(context.Context, *GetProductRequest) ([]VariantProductRow, error)
 	IsUniqueProduct(context.Context, string) (bool, error)
 	ListProduct(context.Context, *ListProductRequest) ([]VariantProductRow, error)
+	RemoveProduct(context.Context, *RemoveProductRequest) error
 }
 
 // NewRepo : Returns product repo

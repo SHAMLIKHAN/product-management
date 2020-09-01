@@ -13,6 +13,8 @@ const (
 	ProductNameExistsErrorCode = 121
 	// IDProductDoesNotExistErrorCode :
 	IDProductDoesNotExistErrorCode = 122
+	// InvalidProductIDErrorCode :
+	InvalidProductIDErrorCode = 123
 	// InvalidVariantIDErrorCode :
 	InvalidVariantIDErrorCode = 131
 
@@ -24,4 +26,6 @@ const (
 	IDProductDoesNotExistError = "id_product doesn't exist"
 	// InvalidVariantIDError :
 	InvalidVariantIDError = "invalid id_variant"
+	// InvalidProductIDError :
+	InvalidProductIDError = "invalid id_product"
 )

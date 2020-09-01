@@ -18,3 +18,8 @@ type ListProductRequest struct {
 	Limit  int
 	Offset int
 }
+
+// RemoveProductRequest :
+type RemoveProductRequest struct {
+	ProductID int
+}

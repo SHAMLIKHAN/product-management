@@ -3,6 +3,8 @@ package product
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"pm/utils"
 )
 
 // PostgresRepo : Product repo struct for postgres
@@ -197,4 +199,54 @@ func (pg *PostgresRepo) ListProduct(ctx context.Context, request *ListProductReq
 		vpList = append(vpList, vp)
 	}
 	return vpList, nil
+}
+
+// RemoveProduct : Postgres function to remove a product and its variants
+func (pg *PostgresRepo) RemoveProduct(ctx context.Context, request *RemoveProductRequest) error {
+	tx, err := pg.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	query := `
+		UPDATE
+			product
+		SET
+			deleted_at = NOW()
+		WHERE
+			id_product = $1
+			AND deleted_at IS NULL
+	`
+	result, err := pg.DB.ExecContext(ctx, query, request.ProductID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	updateCount, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if updateCount == 0 {
+		tx.Rollback()
+		return errors.New(utils.InvalidProductIDError)
+	}
+	query = `
+		UPDATE
+			variant
+		SET
+			deleted_at = NOW()
+		WHERE
+			id_product = $1
+			AND deleted_at IS NULL
+	`
+	_, err = pg.DB.ExecContext(ctx, query, request.ProductID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+	}
+	return nil
 }

@@ -12,6 +12,7 @@ type ServiceInterface interface {
 	CreateProduct(context.Context, *CreateProductRequest) (*Product, error)
 	GetProduct(context.Context, *GetProductRequest) (*VariantProduct, error)
 	ListProduct(context.Context, *ListProductRequest) ([]VariantProduct, error)
+	RemoveProduct(context.Context, *RemoveProductRequest) error
 }
 
 // Service : Product service struct
@@ -124,4 +125,9 @@ func (ps *Service) ListProduct(ctx context.Context, request *ListProductRequest)
 		}
 	}
 	return productList, nil
+}
+
+// RemoveProduct : to remove a product and its variants
+func (ps *Service) RemoveProduct(ctx context.Context, request *RemoveProductRequest) error {
+	return ps.pr.RemoveProduct(ctx, request)
 }
