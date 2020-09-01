@@ -9,6 +9,7 @@ import (
 type Repo interface {
 	CreateCategory(context.Context, *CreateCategoryRequest) (*Category, error)
 	IsUniqueCategory(context.Context, string) (bool, error)
+	ListCategory(context.Context, *ListCategoryRequest) ([]ProductCategoryRow, error)
 }
 
 // NewRepo : Returns category repo

@@ -13,6 +13,7 @@ import (
 // HandlerInterface : Category handler
 type HandlerInterface interface {
 	CreateCategory(w http.ResponseWriter, r *http.Request)
+	ListCategory(w http.ResponseWriter, r *http.Request)
 }
 
 // Handler : Category handler struct
@@ -57,4 +58,27 @@ func (ch *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("App : category created! id_category : ", category.ID)
 	utils.Send(w, 200, category)
+}
+
+// ListCategory : to list out all categories and products
+func (ch *Handler) ListCategory(w http.ResponseWriter, r *http.Request) {
+	log.Println("App : GET /app/category API hit!")
+	req := ListCategoryRequest{
+		Limit:  DefaultListCategoryLimit,
+		Offset: DefaultOffset,
+	}
+	request, err := validateListCategoryRequest(&req, r)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.ValidationErrorCode, err.Error())
+		return
+	}
+	categories, err := ch.cs.ListCategory(r.Context(), request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
+		return
+	}
+	log.Println("App : categories fetched!")
+	utils.Send(w, 200, categories)
 }
