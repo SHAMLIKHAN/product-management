@@ -3,6 +3,8 @@ package category
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"pm/utils"
 )
 
 // PostgresRepo : Category repo struct for postgres
@@ -37,6 +39,46 @@ func (pg *PostgresRepo) CreateCategory(ctx context.Context, request *CreateCateg
 	err := row.Scan(&category.ID, &category.Name, &parentID, &category.CreatedAt, &category.UpdatedAt)
 	category.IDParent = int(parentID.Int32)
 	return &category, err
+}
+
+// IsExistProduct : Postgres function to check is there any undeleted product under the category
+func (pg *PostgresRepo) IsExistProduct(ctx context.Context, request *RemoveCategoryRequest) (bool, error) {
+	var isExist bool
+	query := `
+		SELECT
+			EXISTS
+			(
+				SELECT
+					1
+				FROM
+					product
+				WHERE
+					id_category = $1
+					AND deleted_at IS NULL
+			)
+	`
+	err := pg.DB.QueryRowContext(ctx, query, request.CategoryID).Scan(&isExist)
+	return isExist, err
+}
+
+// IsExistSubCategories : Postgres function to check is there any undeleted sub categories under the category
+func (pg *PostgresRepo) IsExistSubCategories(ctx context.Context, request *RemoveCategoryRequest) (bool, error) {
+	var isExist bool
+	query := `
+		SELECT
+			EXISTS
+			(
+				SELECT
+					1
+				FROM
+					category
+				WHERE
+					id_parent = $1
+					AND deleted_at IS NULL
+			)
+	`
+	err := pg.DB.QueryRowContext(ctx, query, request.CategoryID).Scan(&isExist)
+	return isExist, err
 }
 
 // IsUniqueCategory : Postgres function to verify unique category
@@ -157,4 +199,29 @@ func (pg *PostgresRepo) ListCategory(ctx context.Context, request *ListCategoryR
 		pcList = append(pcList, pc)
 	}
 	return pcList, nil
+}
+
+// RemoveCategory : Postgres function to remove a category
+func (pg *PostgresRepo) RemoveCategory(ctx context.Context, request *RemoveCategoryRequest) error {
+	query := `
+		UPDATE
+			category
+		SET
+			deleted_at = NOW()
+		WHERE
+			id_category = $1
+			AND deleted_at IS NULL
+	`
+	result, err := pg.DB.ExecContext(ctx, query, request.CategoryID)
+	if err != nil {
+		return err
+	}
+	updateCount, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if updateCount == 0 {
+		return errors.New(utils.InvalidCategoryIDError)
+	}
+	return nil
 }

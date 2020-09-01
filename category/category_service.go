@@ -11,6 +11,7 @@ import (
 type ServiceInterface interface {
 	CreateCategory(context.Context, *CreateCategoryRequest) (*Category, error)
 	ListCategory(context.Context, *ListCategoryRequest) ([]ProductCategory, error)
+	RemoveCategory(context.Context, *RemoveCategoryRequest) error
 }
 
 // Service : Category service struct
@@ -164,4 +165,23 @@ func formatCategories(category ProductCategory, categories []ProductCategory) {
 		formatCategories(category, c.Categories)
 	}
 	return
+}
+
+// RemoveCategory : to remove a category
+func (cs *Service) RemoveCategory(ctx context.Context, request *RemoveCategoryRequest) error {
+	isExist, err := cs.cr.IsExistSubCategories(ctx, request)
+	if err != nil {
+		return err
+	}
+	if isExist {
+		return errors.New(utils.SomeSubCategoriesAreBelongsToCategoryError)
+	}
+	isExist, err = cs.cr.IsExistProduct(ctx, request)
+	if err != nil {
+		return err
+	}
+	if isExist {
+		return errors.New(utils.SomeProductsAreBelongsToCategoryError)
+	}
+	return cs.cr.RemoveCategory(ctx, request)
 }

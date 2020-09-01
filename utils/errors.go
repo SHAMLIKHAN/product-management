@@ -9,6 +9,12 @@ const (
 	DatabaseErrorCode = 103
 	// CategoryNameExistsErrorCode :
 	CategoryNameExistsErrorCode = 111
+	// SomeProductsAreBelongsToCategoryErrorCode :
+	SomeProductsAreBelongsToCategoryErrorCode = 112
+	// SomeSubCategoriesAreBelongsToCategoryErrorCode :
+	SomeSubCategoriesAreBelongsToCategoryErrorCode = 113
+	// InvalidCategoryIDErrorCode :
+	InvalidCategoryIDErrorCode = 114
 	// ProductNameExistsErrorCode :
 	ProductNameExistsErrorCode = 121
 	// IDProductDoesNotExistErrorCode :
@@ -28,4 +34,10 @@ const (
 	InvalidVariantIDError = "invalid id_variant"
 	// InvalidProductIDError :
 	InvalidProductIDError = "invalid id_product"
+	// SomeProductsAreBelongsToCategoryError :
+	SomeProductsAreBelongsToCategoryError = "some products are belongs to this category, category can't be removed"
+	// SomeSubCategoriesAreBelongsToCategoryError :
+	SomeSubCategoriesAreBelongsToCategoryError = "some sub categories are belongs to this category, category can't be removed"
+	// InvalidCategoryIDError :
+	InvalidCategoryIDError = "invalid id_category"
 )

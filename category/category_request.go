@@ -11,3 +11,8 @@ type ListCategoryRequest struct {
 	Limit  int
 	Offset int
 }
+
+// RemoveCategoryRequest :
+type RemoveCategoryRequest struct {
+	CategoryID int
+}
