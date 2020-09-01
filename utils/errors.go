@@ -23,6 +23,8 @@ const (
 	InvalidProductIDErrorCode = 123
 	// InvalidVariantIDErrorCode :
 	InvalidVariantIDErrorCode = 131
+	// NothingToUpdateVariantErrorCode :
+	NothingToUpdateVariantErrorCode = 132
 
 	// CategoryNameExistsError :
 	CategoryNameExistsError = "category name exists"
@@ -40,4 +42,6 @@ const (
 	SomeSubCategoriesAreBelongsToCategoryError = "some sub categories are belongs to this category, category can't be removed"
 	// InvalidCategoryIDError :
 	InvalidCategoryIDError = "invalid id_category"
+	// NothingToUpdateVariantError :
+	NothingToUpdateVariantError = "nothing to update variant"
 )

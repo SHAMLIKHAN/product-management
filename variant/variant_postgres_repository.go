@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"pm/utils"
+	"strings"
+	"time"
 )
 
 // PostgresRepo : Variant repo struct for postgres
@@ -180,4 +183,41 @@ func (pg *PostgresRepo) RemoveVariant(ctx context.Context, request *RemoveVarian
 		return errors.New(utils.InvalidVariantIDError)
 	}
 	return nil
+}
+
+// UpdateVariant : Postgres function to update variant of a product
+func (pg *PostgresRepo) UpdateVariant(ctx context.Context, request *UpdateVariantRequest, columns map[string]interface{}) error {
+	var slice []string
+	paramsPosition := 0
+	columns["updated_at"] = time.Now()
+	var params []interface{}
+	for column, value := range columns {
+		paramsPosition++
+		slice = append(slice, fmt.Sprintf(" %s = $%d ", column, paramsPosition))
+		params = append(params, value)
+	}
+	update := strings.Join(slice, ", ")
+	updateQuery := fmt.Sprintf("%s", update)
+	paramsPosition++
+	mainQuery := `
+		UPDATE
+			variant
+		SET
+			%s
+		WHERE
+			id_product = $%d
+			AND id_variant = $%d
+			AND deleted_at IS NULL
+	`
+	query := fmt.Sprintf(mainQuery, updateQuery, paramsPosition, paramsPosition+1)
+	params = append(params, request.ProductID, request.VariantID)
+	result, err := pg.DB.ExecContext(ctx, query, params...)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if rowsAffected == 0 {
+		return errors.New(utils.InvalidVariantIDError)
+	}
+	return err
 }

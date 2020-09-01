@@ -12,6 +12,7 @@ type Repo interface {
 	IsValidProductID(context.Context, int) (bool, error)
 	ListVariant(context.Context, *ListVariantRequest) ([]Variant, error)
 	RemoveVariant(context.Context, *RemoveVariantRequest) error
+	UpdateVariant(context.Context, *UpdateVariantRequest, map[string]interface{}) error
 }
 
 // NewRepo : Returns variant repo

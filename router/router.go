@@ -54,6 +54,7 @@ func (r *ChiRouter) Setup() *chi.Mux {
 		cr.Post("/app/product/{id_product}/variant", vh.CreateVariant)
 		cr.Get("/app/product/{id_product}/variant", vh.ListVariant)
 		cr.Get("/app/product/{id_product}/variant/{id_variant}", vh.GetVariant)
+		cr.Patch("/app/product/{id_product}/variant/{id_variant}", vh.UpdateVariant)
 		cr.Delete("/app/product/{id_product}/variant/{id_variant}", vh.RemoveVariant)
 	})
 	return cr

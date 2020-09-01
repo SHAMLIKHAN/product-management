@@ -13,6 +13,7 @@ type ServiceInterface interface {
 	GetVariant(context.Context, *GetVariantRequest) (*Variant, error)
 	ListVariant(context.Context, *ListVariantRequest) ([]Variant, error)
 	RemoveVariant(context.Context, *RemoveVariantRequest) error
+	UpdateVariant(context.Context, *UpdateVariantRequest) error
 }
 
 // Service : Variant service struct
@@ -73,4 +74,35 @@ func (vs *Service) RemoveVariant(ctx context.Context, request *RemoveVariantRequ
 		return errors.New(utils.IDProductDoesNotExistError)
 	}
 	return vs.vr.RemoveVariant(ctx, request)
+}
+
+// UpdateVariant : to update variant of a product
+func (vs *Service) UpdateVariant(ctx context.Context, request *UpdateVariantRequest) error {
+	isValid, err := vs.vr.IsValidProductID(ctx, request.ProductID)
+	if err != nil {
+		return err
+	}
+	if !isValid {
+		return errors.New(utils.IDProductDoesNotExistError)
+	}
+	columns := make(map[string]interface{})
+	if request.Name != "" {
+		columns["name"] = request.Name
+	}
+	if request.MaxRetailPrice != 0 {
+		columns["max_retail_price"] = request.MaxRetailPrice
+	}
+	if request.DiscountedPrice != 0 {
+		columns["discounted_price"] = request.DiscountedPrice
+	}
+	if request.Size != "" {
+		columns["size"] = request.Size
+	}
+	if request.Colour != "" {
+		columns["colour"] = request.Colour
+	}
+	if len(columns) == 0 {
+		return errors.New(utils.NothingToUpdateVariantError)
+	}
+	return vs.vr.UpdateVariant(ctx, request, columns)
 }
