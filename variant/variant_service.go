@@ -10,6 +10,7 @@ import (
 // ServiceInterface : Variant service
 type ServiceInterface interface {
 	CreateVariant(context.Context, *CreateVariantRequest) (*Variant, error)
+	GetVariant(context.Context, *GetVariantRequest) (*Variant, error)
 	ListVariant(context.Context, *ListVariantRequest) ([]Variant, error)
 }
 
@@ -35,6 +36,18 @@ func (vs *Service) CreateVariant(ctx context.Context, request *CreateVariantRequ
 		return nil, errors.New(utils.IDProductDoesNotExistError)
 	}
 	return vs.vr.CreateVariant(ctx, request)
+}
+
+// GetVariant : to get a variant of a product
+func (vs *Service) GetVariant(ctx context.Context, request *GetVariantRequest) (*Variant, error) {
+	isValid, err := vs.vr.IsValidProductID(ctx, request.ProductID)
+	if err != nil {
+		return nil, err
+	}
+	if !isValid {
+		return nil, errors.New(utils.IDProductDoesNotExistError)
+	}
+	return vs.vr.GetVariant(ctx, request)
 }
 
 // ListVariant : to list out all variants of a product

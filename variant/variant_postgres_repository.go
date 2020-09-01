@@ -52,6 +52,43 @@ func (pg *PostgresRepo) CreateVariant(ctx context.Context, request *CreateVarian
 	return &variant, err
 }
 
+// GetVariant : Postgres function to get variant of a product
+func (pg *PostgresRepo) GetVariant(ctx context.Context, request *GetVariantRequest) (*Variant, error) {
+	var variant Variant
+	var name, size, colour sql.NullString
+	var discountedPrice sql.NullFloat64
+	query := `
+		SELECT
+			name, max_retail_price, discounted_price, size, colour, created_at, updated_at
+		FROM
+			variant
+		WHERE
+			id_variant = $1
+			AND id_product = $2
+			AND deleted_at IS NULL
+	`
+	row := pg.DB.QueryRowContext(ctx, query, request.VariantID, request.ProductID)
+	err := row.Scan(&name, &variant.MaxRetailPrice, &discountedPrice, &size, &colour, &variant.CreatedAt, &variant.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	if name.Valid {
+		variant.Name = name.String
+	}
+	if size.Valid {
+		variant.Size = size.String
+	}
+	if colour.Valid {
+		variant.Colour = colour.String
+	}
+	if discountedPrice.Valid {
+		variant.DiscountedPrice = discountedPrice.Float64
+	}
+	variant.ID = request.VariantID
+	variant.ProductID = request.ProductID
+	return &variant, nil
+}
+
 // IsValidProductID : Postgres function to validate id_product
 func (pg *PostgresRepo) IsValidProductID(ctx context.Context, productID int) (bool, error) {
 	var isValid bool

@@ -16,6 +16,7 @@ import (
 // HandlerInterface : Variant handler
 type HandlerInterface interface {
 	CreateVariant(w http.ResponseWriter, r *http.Request)
+	GetVariant(w http.ResponseWriter, r *http.Request)
 	ListVariant(w http.ResponseWriter, r *http.Request)
 }
 
@@ -67,6 +68,39 @@ func (vh *Handler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("App : variant created! id_variant : ", variant.ID)
+	utils.Send(w, 200, variant)
+}
+
+// GetVariant : to get a variant of a product
+func (vh *Handler) GetVariant(w http.ResponseWriter, r *http.Request) {
+	log.Println("App : GET /app/product/{id_product}/variant/{id_variant} API hit!")
+	productID, err := strconv.Atoi(chi.URLParam(r, "id_product"))
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, errors.New("invalid id_product").Error())
+		return
+	}
+	variantID, err := strconv.Atoi(chi.URLParam(r, "id_variant"))
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		utils.Fail(w, 400, utils.DecodeErrorCode, errors.New("invalid id_variant").Error())
+		return
+	}
+	request := GetVariantRequest{
+		ProductID: productID,
+		VariantID: variantID,
+	}
+	variant, err := vh.vs.GetVariant(r.Context(), &request)
+	if err != nil {
+		log.Println("Error : ", err.Error())
+		if err.Error() == utils.IDProductDoesNotExistError {
+			utils.Fail(w, 400, utils.IDProductDoesNotExistErrorCode, err.Error())
+			return
+		}
+		utils.Fail(w, 500, utils.DatabaseErrorCode, err.Error())
+		return
+	}
+	log.Println("App : variant fetched! id_variant : ", variantID)
 	utils.Send(w, 200, variant)
 }
 

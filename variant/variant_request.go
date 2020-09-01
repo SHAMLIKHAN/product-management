@@ -10,6 +10,12 @@ type CreateVariantRequest struct {
 	ProductID       int     `json:"id_product"`
 }
 
+// GetVariantRequest :
+type GetVariantRequest struct {
+	ProductID int
+	VariantID int
+}
+
 // ListVariantRequest :
 type ListVariantRequest struct {
 	ProductID int
