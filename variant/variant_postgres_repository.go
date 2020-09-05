@@ -75,6 +75,9 @@ func (pg *PostgresRepo) GetVariant(ctx context.Context, request *GetVariantReque
 	row := pg.DB.QueryRowContext(ctx, query, request.VariantID, request.ProductID)
 	err := row.Scan(&name, &variant.MaxRetailPrice, &discountedPrice, &size, &colour, &variant.CreatedAt, &variant.UpdatedAt)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New(utils.InvalidVariantIDError)
+		}
 		return nil, err
 	}
 	if name.Valid {
